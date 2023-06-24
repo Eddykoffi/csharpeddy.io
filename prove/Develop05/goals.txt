@@ -1,0 +1,9 @@
+SimpleGoal,Complete Quest 1,10,True
+0,0,0
+25
+2
+700
+EternalGoal,Explore Dungeon,5,False
+0,0,0
+ChecklistGoal,Collect 5 Gems,2,False
+5,3,10
