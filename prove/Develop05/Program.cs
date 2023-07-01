@@ -2,195 +2,138 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-public abstract class Goal
+abstract class Goal
 {
-    public string Name { get; set; }
-    public int Value { get; set; }
-    public bool Completed { get; set; }
+    private string name;
+    private int value;
 
-    public virtual void MarkComplete()
+    public string Name { get { return name; } }
+    public int Value { get { return value; } }
+
+    public Goal(string name, int value)
     {
-        Completed = true;
+        this.name = name;
+        this.value = value;
     }
 
-    public virtual string DisplayStatus()
+    public virtual void DisplayStatus()
     {
-        return Completed ? "[X]" : "[ ]";
-    }
-}
-
-public class SimpleGoal : Goal
-{
-    public SimpleGoal(string name, int value)
-    {
-        Name = name;
-        Value = value;
-    }
-}
-
-public class EternalGoal : Goal
-{
-    public EternalGoal(string name, int value)
-    {
-        Name = name;
-        Value = value;
-    }
-}
-
-public class ChecklistGoal : Goal
-{
-    public int TargetCount { get; set; }
-    public int CurrentCount { get; set; }
-    public int BonusValue { get; set; }
-
-    public ChecklistGoal(string name, int value, int targetCount, int bonusValue)
-    {
-        Name = name;
-        Value = value;
-        TargetCount = targetCount;
-        BonusValue = bonusValue;
+        Console.WriteLine($"Goal: {name} | Value: {value}");
     }
 
-    public override void MarkComplete()
+    public abstract void CompleteGoal();
+
+    public abstract void RecordEvent();
+
+    public virtual string Serialize()
     {
-        CurrentCount++;
-        if (CurrentCount == TargetCount)
-            Completed = true;
+        return $"{GetType().Name},{name},{value}";
     }
 
-    public override string DisplayStatus()
+    public virtual void Deserialize(string data)
     {
-        return $"Completed {CurrentCount}/{TargetCount} times";
-    }
-}
-
-public class QuestTracker
-{
-    public List<Goal> Goals { get; set; }
-    public int Score { get; set; }
-    public int Level { get; set; }
-    public int Experience { get; set; }
-
-    public QuestTracker()
-    {
-        Goals = new List<Goal>();
-        Score = 0;
-        Level = 1;
-        Experience = 0;
-    }
-
-    public void AddGoal(Goal goal)
-    {
-        Goals.Add(goal);
-    }
-
-    public void RecordEvent(string goalName)
-    {
-        foreach (var goal in Goals)
+        string[] parts = data.Split(',');
+        if (parts.Length >= 3)
         {
-            if (goal.Name == goalName)
-            {
-                goal.MarkComplete();
-                Score += goal.Value;
+            name = parts[1];
+            value = int.Parse(parts[2]);
+        }
+    }
+}
 
-                if (goal is ChecklistGoal checklistGoal && checklistGoal.Completed)
-                {
-                    Score += checklistGoal.BonusValue;
-                    Experience += checklistGoal.BonusValue;
+class SimpleGoal : Goal
+{
+    public SimpleGoal(string name, int value) : base(name, value)
+    {
+    }
 
-                    if (Experience >= Level * 1000)
-                    {
-                        Level++;
-                        Experience = 0;
-                    }
-                }
+    public override void CompleteGoal()
+    {
+        Console.WriteLine($"Completed Simple Goal: {Name}");
+    }
 
-                break;
-            }
+    public override void RecordEvent()
+    {
+        Console.WriteLine("Cannot record event for a Simple Goal.");
+    }
+}
+
+class EternalGoal : Goal
+{
+    public EternalGoal(string name, int value) : base(name, value)
+    {
+    }
+
+    public override void CompleteGoal()
+    {
+        Console.WriteLine("Cannot complete an Eternal Goal.");
+    }
+
+    public override void RecordEvent()
+    {
+        Console.WriteLine($"Recorded event for Eternal Goal: {Name}");
+    }
+}
+
+class ChecklistGoal : Goal
+{
+    private int requiredCount;
+    private int currentCount;
+
+    public int RequiredCount { get { return requiredCount; } }
+    public int CurrentCount { get { return currentCount; } }
+
+    public ChecklistGoal(string name, int value, int requiredCount) : base(name, value)
+    {
+        this.requiredCount = requiredCount;
+        this.currentCount = 0;
+    }
+
+    public override void DisplayStatus()
+    {
+        Console.WriteLine($"Goal: {Name} | Value: {Value} | Completed: {CurrentCount}/{RequiredCount}");
+    }
+
+    public override void CompleteGoal()
+    {
+        if (currentCount >= requiredCount)
+        {
+            Console.WriteLine($"Cannot complete the Checklist Goal {Name}. It is already completed.");
+        }
+        else
+        {
+            Console.WriteLine($"Completed Checklist Goal: {Name}");
+            currentCount = requiredCount;
         }
     }
 
-    public void DisplayGoals()
+    public override void RecordEvent()
     {
-        Console.WriteLine("Quest Goals:");
-        foreach (var goal in Goals)
+        if (currentCount < requiredCount)
         {
-            Console.WriteLine($"{goal.DisplayStatus()} - {goal.Name}");
+            Console.WriteLine($"Recorded event for Checklist Goal: {Name}");
+            currentCount++;
+        }
+        else
+        {
+            Console.WriteLine($"Cannot record event for the Checklist Goal {Name}. It is already completed.");
         }
     }
 
-    public void DisplayScore()
+    public override string Serialize()
     {
-        Console.WriteLine($"Current Score: {Score}");
-        Console.WriteLine($"Level: {Level}");
-        Console.WriteLine($"Experience: {Experience}/{Level * 1000}");
+        return $"{base.Serialize()},{requiredCount},{currentCount}";
     }
 
-    public void SaveGoals(string filename)
+    public override void Deserialize(string data)
     {
-        using (StreamWriter writer = new StreamWriter(filename))
+        base.Deserialize(data);
+
+        string[] parts = data.Split(',');
+        if (parts.Length >= 5)
         {
-            foreach (var goal in Goals)
-            {
-                writer.WriteLine($"{goal.GetType().Name},{goal.Name},{goal.Value},{goal.Completed}");
-
-                if (goal is ChecklistGoal checklistGoal)
-                {
-                    writer.WriteLine($"{checklistGoal.TargetCount},{checklistGoal.CurrentCount},{checklistGoal.BonusValue}");
-                }
-            }
-
-            writer.WriteLine(Score);
-            writer.WriteLine(Level);
-            writer.WriteLine(Experience);
-        }
-    }
-
-    public void LoadGoals(string filename)
-    {
-        Goals.Clear();
-
-        using (StreamReader reader = new StreamReader(filename))
-        {
-            string line;
-
-            while ((line = reader.ReadLine()) != null)
-            {
-                string[] parts = line.Split(',');
-
-                string goalType = parts[0];
-                string goalName = parts[1];
-                int goalValue = int.Parse(parts[2]);
-                bool goalCompleted = bool.Parse(parts[3]);
-
-                Goal goal;
-
-                switch (goalType)
-                {
-                    case nameof(SimpleGoal):
-                        goal = new SimpleGoal(goalName, goalValue);
-                        break;
-                    case nameof(EternalGoal):
-                        goal = new EternalGoal(goalName, goalValue);
-                        break;
-                    case nameof(ChecklistGoal):
-                        int targetCount = int.Parse(parts[4]);
-                        int currentCount = int.Parse(parts[5]);
-                        int bonusValue = int.Parse(parts[6]);
-                        goal = new ChecklistGoal(goalName, goalValue, targetCount, bonusValue);
-                        ((ChecklistGoal)goal).CurrentCount = currentCount;
-                        break;
-                    default:
-                        throw new InvalidOperationException($"Invalid goal type: {goalType}");
-                }
-
-                goal.Completed = goalCompleted;
-                Goals.Add(goal);
-            }
-
-            Score = int.Parse(reader.ReadLine());
-            Level = int.Parse(reader.ReadLine());
-            Experience = int.Parse(reader.ReadLine());
+            requiredCount = int.Parse(parts[3]);
+            currentCount = int.Parse(parts[4]);
         }
     }
 }
@@ -199,42 +142,221 @@ class Program
 {
     static void Main(string[] args)
     {
-        QuestTracker tracker = new QuestTracker();
+        List<Goal> goals = new List<Goal>();
 
-        // Create and add goals
-        Goal goal1 = new SimpleGoal("Complete Quest 1", 10);
-        Goal goal2 = new EternalGoal("Explore Dungeon", 5);
-        Goal goal3 = new ChecklistGoal("Collect 5 Gems", 2, 5, 10);
+        LoadGoals(goals);
 
-        tracker.AddGoal(goal1);
-        tracker.AddGoal(goal2);
-        tracker.AddGoal(goal3);
+        if (goals.Count == 0)
+        {
+            CreateDefaultGoals(goals);
+        }
 
-        // Record events
-        tracker.RecordEvent("Complete Quest 1");
-        tracker.RecordEvent("Explore Dungeon");
-        tracker.RecordEvent("Collect 5 Gems");
-        tracker.RecordEvent("Collect 5 Gems");
-        tracker.RecordEvent("Collect 5 Gems");
-        tracker.RecordEvent("Collect 5 Gems");
-        tracker.RecordEvent("Collect 5 Gems");
+        bool isRunning = true;
+        while (isRunning)
+        {
+            Console.Clear();
+            Console.WriteLine("===== Eternal Quest Program =====");
+            Console.WriteLine("1. View Goals");
+            Console.WriteLine("2. Complete Goal");
+            Console.WriteLine("3. Record Event");
+            Console.WriteLine("4. Create New Goal");
+            Console.WriteLine("5. Save Goals");
+            Console.WriteLine("6. Load Goals");
+            Console.WriteLine("0. Exit");
+            Console.Write("Enter your choice: ");
+            string choice = Console.ReadLine();
 
-        // Display goals and score
-        tracker.DisplayGoals();
-        Console.WriteLine();
-        tracker.DisplayScore();
+            Console.Clear();
+            switch (choice)
+            {
+                case "1":
+                    DisplayGoals(goals);
+                    break;
+                case "2":
+                    CompleteGoal(goals);
+                    break;
+                case "3":
+                    RecordEvent(goals);
+                    break;
+                case "4":
+                    CreateNewGoal(goals);
+                    break;
+                case "5":
+                    SaveGoals(goals);
+                    break;
+                case "6":
+                    LoadGoals(goals);
+                    break;
+                case "0":
+                    isRunning = false;
+                    break;
+                default:
+                    Console.WriteLine("Invalid choice. Please try again.");
+                    break;
+            }
 
-        // Save goals
-        tracker.SaveGoals("goals.txt");
+            Console.WriteLine("\nPress any key to continue...");
+            Console.ReadKey();
+        }
+    }
 
-        // Reset tracker and load goals
-        tracker = new QuestTracker();
-        tracker.LoadGoals("goals.txt");
+    static void CreateDefaultGoals(List<Goal> goals)
+    {
+        goals.Add(new SimpleGoal("Run a Marathon", 1000));
+        goals.Add(new EternalGoal("Read Scriptures", 100));
+        goals.Add(new ChecklistGoal("Attend the Temple", 50, 10));
+    }
 
-        // Display loaded goals and score
-        Console.WriteLine("\nLoaded Goals:");
-        tracker.DisplayGoals();
-        Console.WriteLine();
-        tracker.DisplayScore();
+    static void CreateNewGoal(List<Goal> goals)
+    {
+        Console.WriteLine("===== Create New Goal =====");
+        Console.Write("Enter goal name: ");
+        string name = Console.ReadLine();
+        Console.Write("Enter goal value: ");
+        int value = int.Parse(Console.ReadLine());
+        Console.WriteLine("Select goal type:");
+        Console.WriteLine("1. Simple Goal");
+        Console.WriteLine("2. Eternal Goal");
+        Console.WriteLine("3. Checklist Goal");
+        Console.Write("Enter goal type: ");
+        string type = Console.ReadLine();
+
+        switch (type)
+        {
+            case "1":
+                goals.Add(new SimpleGoal(name, value));
+                break;
+            case "2":
+                goals.Add(new EternalGoal(name, value));
+                break;
+            case "3":
+                Console.Write("Enter required count: ");
+                int requiredCount = int.Parse(Console.ReadLine());
+                goals.Add(new ChecklistGoal(name, value, requiredCount));
+                break;
+            default:
+                Console.WriteLine("Invalid goal type. New goal creation failed.");
+                break;
+        }
+
+        Console.WriteLine("New goal created successfully.");
+    }
+
+    static void DisplayGoals(List<Goal> goals)
+    {
+        Console.WriteLine("===== Goals =====");
+        if (goals.Count == 0)
+        {
+            Console.WriteLine("No goals found.");
+        }
+        else
+        {
+            foreach (Goal goal in goals)
+            {
+                goal.DisplayStatus();
+            }
+        }
+    }
+
+    static void CompleteGoal(List<Goal> goals)
+    {
+        Console.WriteLine("===== Complete Goal =====");
+        Console.Write("Enter the index of the goal to complete: ");
+        int index = int.Parse(Console.ReadLine());
+
+        if (index >= 0 && index < goals.Count)
+        {
+            Goal goal = goals[index];
+            goal.CompleteGoal();
+        }
+        else
+        {
+            Console.WriteLine("Invalid goal index.");
+        }
+    }
+
+    static void RecordEvent(List<Goal> goals)
+    {
+        Console.WriteLine("===== Record Event =====");
+        Console.Write("Enter the index of the goal to record event: ");
+        int index = int.Parse(Console.ReadLine());
+
+        if (index >= 0 && index < goals.Count)
+        {
+            Goal goal = goals[index];
+            goal.RecordEvent();
+        }
+        else
+        {
+            Console.WriteLine("Invalid goal index.");
+        }
+    }
+
+    static void SaveGoals(List<Goal> goals)
+    {
+        Console.WriteLine("===== Save Goals =====");
+        Console.Write("Enter the file name to save goals: ");
+        string fileName = Console.ReadLine();
+
+        using (StreamWriter writer = new StreamWriter(fileName))
+        {
+            foreach (Goal goal in goals)
+            {
+                writer.WriteLine(goal.Serialize());
+            }
+        }
+
+        Console.WriteLine("Goals saved successfully.");
+    }
+
+    static void LoadGoals(List<Goal> goals)
+    {
+        Console.WriteLine("===== Load Goals =====");
+        Console.Write("Enter the file name to load goals: ");
+        string fileName = Console.ReadLine();
+
+        if (File.Exists(fileName))
+        {
+            goals.Clear();
+
+            using (StreamReader reader = new StreamReader(fileName))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    string[] parts = line.Split(',');
+                    if (parts.Length >= 1)
+                    {
+                        string goalType = parts[0];
+                        Goal goal;
+
+                        switch (goalType)
+                        {
+                            case nameof(SimpleGoal):
+                                goal = new SimpleGoal("", 0);
+                                break;
+                            case nameof(EternalGoal):
+                                goal = new EternalGoal("", 0);
+                                break;
+                            case nameof(ChecklistGoal):
+                                goal = new ChecklistGoal("", 0, 0);
+                                break;
+                            default:
+                                Console.WriteLine($"Invalid goal type '{goalType}'. Skipping the goal.");
+                                continue;
+                        }
+
+                        goal.Deserialize(line);
+                        goals.Add(goal);
+                    }
+                }
+            }
+
+            Console.WriteLine("Goals loaded successfully.");
+        }
+        else
+        {
+            Console.WriteLine("Goals file not found. Loading failed.");
+        }
     }
 }
