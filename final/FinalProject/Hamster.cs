@@ -1,4 +1,7 @@
 public class Hamster : Pet
 {
-    // No additional methods specific to Hamster class
+    public override void Play()
+    {
+        Console.WriteLine($"{_name} is running on a wheel.");
+    }
 }
