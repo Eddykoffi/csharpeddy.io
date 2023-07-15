@@ -1,17 +1,19 @@
+using System;
+
 public class Veterinary
 {
-    public void Checkup(Pet pet)
+    public void Checkup(IPet pet)
     {
-        // Implementation for performing a checkup on a pet
+        Console.WriteLine($"Performing checkup on {pet.Name}.");
     }
 
-    public void Vaccinate(Pet pet)
+    public void Vaccinate(IPet pet)
     {
-        // Implementation for administering vaccinations to a pet
+        Console.WriteLine($"Administering vaccination to {pet.Name}.");
     }
 
-    public void TreatInjury(Pet pet)
+    public void TreatInjury(IPet pet)
     {
-        // Implementation for treating a pet's injury or ailment
+        Console.WriteLine($"Treating injury of {pet.Name}.");
     }
 }
