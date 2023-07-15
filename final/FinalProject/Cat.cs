@@ -2,6 +2,11 @@ public class Cat : Pet
 {
     public void Meow()
     {
-        // Implementation for cat's meowing behavior
+        Console.WriteLine($"{_name} is meowing.");
+    }
+
+    public override void Sleep()
+    {
+        Console.WriteLine($"{_name} is taking a nap.");
     }
 }
