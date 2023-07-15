@@ -2,52 +2,25 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Create instances of Pet subclasses
-        Dog dog = new Dog();
-        Cat cat = new Cat();
-        Fish fish = new Fish();
-        Hamster hamster = new Hamster();
-
-        // Set properties
-        dog.Name = "Buddy";
-        cat.Name = "Whiskers";
-        fish.Name = "Nemo";
-        hamster.Name = "Nibbles";
-
-        // Invoke specific methods
-        dog.Bark();
-        cat.Meow();
-        fish.Swim();
-
-        // Create PetStore instance
         PetStore petStore = new PetStore();
+        Veterinary veterinary = new Veterinary();
 
-        // Add pets to the store
+        IPet dog = new Dog { Name = "Buddy", Age = 3 };
+        IPet cat = new Cat { Name = "Whiskers", Age = 5 };
+        IPet fish = new Fish { Name = "Nemo", Age = 1 };
+        IPet hamster = new Hamster { Name = "Nibbles", Age = 2 };
+
         petStore.AddPet(dog);
         petStore.AddPet(cat);
         petStore.AddPet(fish);
         petStore.AddPet(hamster);
 
-        // Display available pets in the store
-        petStore.DisplayAvailablePets();
+        Customer customer = new Customer { Name = "John" };
 
-        // Create Veterinary instance
-        Veterinary veterinary = new Veterinary();
-
-        // Create Customer instance
-        Customer customer = new Customer();
-        customer.Name = "John";
-
-        // Interact with pets
-        customer.InteractWithPet(dog);
-        customer.InteractWithPet(cat);
-        customer.InteractWithPet(fish);
-        customer.InteractWithPet(hamster);
-
-        // Take pets to the veterinary clinic
-        customer.TakePetToVeterinary(dog, veterinary);
-        customer.TakePetToVeterinary(cat, veterinary);
-        customer.TakePetToVeterinary(fish, veterinary);
-        customer.TakePetToVeterinary(hamster, veterinary);
+        foreach (IPet pet in petStore.GetAvailablePets())
+        {
+            customer.InteractWithPet(pet);
+            customer.TakePetToVeterinary(pet, veterinary);
+        }
     }
 }
