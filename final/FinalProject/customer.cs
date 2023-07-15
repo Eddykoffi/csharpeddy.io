@@ -1,17 +1,22 @@
+using System;
+
 public class Customer
 {
     protected string _name;
 
     public string Name { get; set; }
 
-    public void InteractWithPet(Pet pet)
+    public void InteractWithPet(IPet pet)
     {
-        // Implementation for customer's interaction with a pet
+        Console.WriteLine($"{_name} is interacting with {pet.Name}.");
+        pet.Play();
     }
 
-    public void TakePetToVeterinary(Pet pet, Veterinary vet)
+    public void TakePetToVeterinary(IPet pet, Veterinary vet)
     {
-        // Implementation for customer taking a pet to the veterinary clinic
+        Console.WriteLine($"{_name} is taking {pet.Name} to the veterinary clinic.");
+        vet.Checkup(pet);
+        vet.Vaccinate(pet);
+        vet.TreatInjury(pet);
     }
 }
-
