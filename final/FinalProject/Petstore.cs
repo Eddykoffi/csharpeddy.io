@@ -1,21 +1,31 @@
+using System;
 using System.Collections.Generic;
 
 public class PetStore
 {
-    protected List<Pet> pets;
+    protected List<IPet> _pets;
 
     public PetStore()
     {
-        pets = new List<Pet>();
+        _pets = new List<IPet>();
     }
 
-    public void AddPet(Pet pet)
+    public void AddPet(IPet pet)
     {
-        pets.Add(pet);
+        _pets.Add(pet);
     }
 
     public void DisplayAvailablePets()
     {
-        // Implementation for displaying available pets in the store
+        Console.WriteLine("Available Pets:");
+        foreach (IPet pet in _pets)
+        {
+            Console.WriteLine($"- {pet.Name}");
+        }
+    }
+
+    public List<IPet> GetAvailablePets()
+    {
+        return _pets;
     }
 }
