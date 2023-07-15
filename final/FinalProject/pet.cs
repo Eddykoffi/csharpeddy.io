@@ -6,7 +6,18 @@ public abstract class Pet : IPet
     public string Name { get; set; }
     public int Age { get; set; }
 
-    public abstract void Eat();
-    public abstract void Play();
-    public abstract void Sleep();
+    public virtual void Eat()
+    {
+        Console.WriteLine($"{_name} is eating.");
+    }
+
+    public virtual void Play()
+    {
+        Console.WriteLine($"{_name} is playing.");
+    }
+
+    public virtual void Sleep()
+    {
+        Console.WriteLine($"{_name} is sleeping.");
+    }
 }
