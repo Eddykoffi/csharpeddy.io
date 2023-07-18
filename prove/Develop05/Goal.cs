@@ -1,4 +1,4 @@
-public abstract class Goal
+abstract class Goal
 {
     private string name;
     private int value;
@@ -10,11 +10,6 @@ public abstract class Goal
     {
         this.name = name;
         this.value = value;
-    }
-
-    public virtual void DisplayStatus()
-    {
-        Console.WriteLine($"Goal: {name} | Value: {value}");
     }
 
     public abstract void CompleteGoal();
