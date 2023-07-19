@@ -1,3 +1,5 @@
+using System;
+
 abstract class Goal
 {
     private string name;
@@ -15,6 +17,11 @@ abstract class Goal
     public abstract void CompleteGoal();
 
     public abstract void RecordEvent();
+
+    public virtual void DisplayStatus()
+    {
+        Console.WriteLine($"Goal: {Name} | Value: {Value}");
+    }
 
     public virtual string Serialize()
     {
