@@ -1,3 +1,5 @@
+using System;
+
 class ChecklistGoal : Goal
 {
     private int requiredCount;
@@ -38,20 +40,9 @@ class ChecklistGoal : Goal
         }
     }
 
-    public override string Serialize()
+    public override void DisplayStatus()
     {
-        return $"{base.Serialize()},{requiredCount},{currentCount}";
-    }
-
-    public override void Deserialize(string data)
-    {
-        base.Deserialize(data);
-
-        string[] parts = data.Split(',');
-        if (parts.Length >= 5)
-        {
-            requiredCount = int.Parse(parts[3]);
-            currentCount = int.Parse(parts[4]);
-        }
+        base.DisplayStatus();
+        Console.WriteLine($"Type: Checklist Goal | Progress: {CurrentCount}/{RequiredCount}");
     }
 }
