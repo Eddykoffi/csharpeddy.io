@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
 
 // Derived class for the reflection activity
 public class ReflectionActivity : Activity
@@ -32,21 +31,21 @@ public class ReflectionActivity : Activity
 
     public override void Start()
     {
-        Console.WriteLine(Name + " Activity");
+        Console.WriteLine("Reflection Activity");
         Console.WriteLine(Description);
         Console.Write("Enter duration in seconds: ");
         Duration = int.Parse(Console.ReadLine());
         Console.WriteLine("Prepare to begin...");
-        Thread.Sleep(3000);
+        System.Threading.Thread.Sleep(3000);
         Console.WriteLine("Start reflecting...");
-        Thread.Sleep(2000);
+        System.Threading.Thread.Sleep(2000);
         Random random = new Random();
 
         for (int i = 0; i < Duration; i++)
         {
             string prompt = prompts[random.Next(prompts.Count)];
             Console.WriteLine(prompt);
-            Thread.Sleep(2000);
+            System.Threading.Thread.Sleep(2000);
 
             foreach (string question in questions)
             {
@@ -60,6 +59,6 @@ public class ReflectionActivity : Activity
     {
         Console.WriteLine("Well done!");
         Console.WriteLine($"You have completed the {Name} activity for {Duration} seconds.");
-        Thread.Sleep(3000);
+        System.Threading.Thread.Sleep(3000);
     }
 }
