@@ -1,3 +1,5 @@
+using System;
+
 class EternalGoal : Goal
 {
     public EternalGoal(string name, int value) : base(name, value)
@@ -12,5 +14,11 @@ class EternalGoal : Goal
     public override void RecordEvent()
     {
         Console.WriteLine($"Recorded event for Eternal Goal: {Name}");
+    }
+
+    public override void DisplayStatus()
+    {
+        base.DisplayStatus();
+        Console.WriteLine("Type: Eternal Goal");
     }
 }
