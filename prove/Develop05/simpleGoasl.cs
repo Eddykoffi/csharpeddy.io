@@ -1,3 +1,5 @@
+using System;
+
 class SimpleGoal : Goal
 {
     public SimpleGoal(string name, int value) : base(name, value)
@@ -11,6 +13,12 @@ class SimpleGoal : Goal
 
     public override void RecordEvent()
     {
-        Console.WriteLine("Cannot record event for a Simple Goal.");
+        Console.WriteLine($"Recorded event for Simple Goal: {Name}");
+    }
+
+    public override void DisplayStatus()
+    {
+        base.DisplayStatus();
+        Console.WriteLine("Type: Simple Goal");
     }
 }
