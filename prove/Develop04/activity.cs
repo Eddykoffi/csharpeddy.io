@@ -3,27 +3,9 @@ using System;
 // Base class for all activities
 public abstract class Activity
 {
-    private string name;
-    private string description;
-    private int duration;
-
-    public string Name
-    {
-        get { return name; }
-        protected set { name = value; }
-    }
-
-    public string Description
-    {
-        get { return description; }
-        protected set { description = value; }
-    }
-
-    public int Duration
-    {
-        get { return duration; }
-        protected set { duration = value; }
-    }
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public int Duration { get; set; }
 
     protected Activity(string name, string description)
     {
